@@ -9,6 +9,20 @@ const ShoppingCart = () => {
     const [page, setPage] = useState(0);
     const [buttonLabel, setButtonLabel] = useState("Tee tilaus");
 
+    const [orderList, setOrderList] = useState([]);
+
+    useEffect(() => {
+        let keys = [];
+        for (let keyValuePair of order) {
+            let key = keyValuePair[0];
+            let value = keyValuePair[1];
+            if (value) {
+                keys.push(key);
+            }
+        }
+        setOrderList(keys);
+    }, [order])
+
 
     const handleOrder = () => {
         let value = page + 1;
@@ -27,16 +41,23 @@ const ShoppingCart = () => {
     const handleEvent = (event) => {
         let tempMapOrder = new Map(order)
         let tempEvents = [...events]
-        if (event instanceof AddProductToCart) {
-            console.log("AddProductToCart(" + event.name+")")
-            tempMapOrder.set(event.name, true)
-            tempEvents.push(new ProductAddedToCart(event.name))
+
+        if (page ===  0) {
+
+            if (event instanceof AddProductToCart) {
+                console.log("AddProductToCart(" + event.name+")")
+                tempMapOrder.set(event.name, true)
+                tempEvents.push(new ProductAddedToCart(event.name))
+            }
+            if (event instanceof RemoveProductFromCart) {
+                console.log("RemoveProductFromCart(" + event.name+")")
+                tempMapOrder.set(event.name, false)
+                tempEvents.push(new ProductRemovedFromCart(event.name))
+            }
+            setEvents(tempEvents)
+            setOrder(tempMapOrder)
         }
-        if (event instanceof RemoveProductFromCart) {
-            console.log("RemoveProductFromCart(" + event.name+")")
-            tempMapOrder.set(event.name, false)
-            tempEvents.push(new ProductRemovedFromCart(event.name))
-        }
+
         if (event instanceof MakeOrderFromCart) {
             if (page === 0){
                 console.log("OrderMadeFromCart()")
@@ -44,17 +65,21 @@ const ShoppingCart = () => {
             }
             handleOrder()
         }
-
-        setEvents(tempEvents)
-        setOrder(tempMapOrder)
     }
 
     const products = ["Mozzarella", "Pepperooni", "Ananas", "Paprika", "Kesäkurpitsa", "Tonnikala", "Jauheliha", "Kebab", "Valkosipulidippi"]
     return (
-        <div style={{"width": "100%"}}>
+        <div style={{width: "100%"}}>
+            <div style={{width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "3px double rgb(100, 10, 10)"}}>
+                <h1 style={{marginLeft: "30px"}}>Pizzakauppa.com</h1>
+                <button style={{marginRight: "30px", marginTop: "30px", height: "50px"}} onClick={() => handleEvent(new MakeOrderFromCart(order))}>
+                    {buttonLabel}
+                </button>
+            </div>
+
             <div style={{"display": "flex", "width": "100%", borderBottom: "3px double rgb(200, 10, 10)", paddingBottom: "10px", marginBottom: "10px"}}>
                 {page % 3 === 0 &&
-                    <div style={{"marginLeft": "50px", "width": "50%","display": "flex", "flexDirection" : "column", "justifyContent": "flex-start", "alignItems": "flex-start"}}>
+                    <div style={{"marginLeft": "40px", "width": "50%","display": "flex", "flexDirection" : "column", "justifyContent": "flex-start", "alignItems": "flex-start"}}>
                         {products.map(p => 
                                     <Checkbox
                                         key = {p + p}
@@ -66,29 +91,44 @@ const ShoppingCart = () => {
                     </div>
                 }
                 {page % 3 === 1 &&
-                    <div style={{"width": "50%", padding: "10px"}}>
+                    <div style={{"width": "50%", paddingLeft: "30px", fontSize: "20px"}}>
                         {events[events.length-1].toString()}
+                        <table style={{textAlign: "right", fontSize: "20px"}}>
+                            <tbody>
+                                <tr>
+                                    <th>event id</th>
+                                    <th>cart id</th>
+                                    {products.map(((p, index) => 
+                                        <th key={p + index}>
+                                            {p}
+                                        </th>
+                                    ))}
+                                </tr>
+                                <tr >
+                                        <td>0</td>
+                                        <td>pizzanTilaaja02</td>
+                                {products.map((product, index) => {
+                                    return (
+                                            <td key={index + product + "xyz"}>{orderList.includes(product) ? "true" : "false"}</td>
+                                    )
+                                })}
+                                </tr>
+
+                            </tbody>
+                        </table>
                     </div>
                 }
                 {page % 3 === 2 &&
-                    <div style={{"width": "100%"}}>
+                    <div style={{"width": "100%", paddingLeft: "30px"}}>
                         <EventPrint events={events}/>
                     </div>
                 }
-                {page % 3 !== 2 &&
+                {page % 3 === 0 &&
                     <Order
                         products={order}
                     />
                 }
 
-        </div>
-        <div style={{"width": "100%", display: "flex"}}>
-            <div style={{"width": "50%", margin: "50px"}}></div>
-            <div style={{"width": "50%", display: "flex"}}>
-                <button onClick={() => handleEvent(new MakeOrderFromCart(order))}>
-                    {buttonLabel}
-                </button>
-            </div>
         </div>
       </div>
 
@@ -97,7 +137,8 @@ const ShoppingCart = () => {
 
 const EventPrint = ({ events }) => {
     return (
-        <div style={{display: "flex", justifyContent: "flex-start"}}>
+        <div>
+                Event journal
                 <table style={{textAlign: "right"}}>
                     <tbody>
                         <tr>
@@ -110,7 +151,7 @@ const EventPrint = ({ events }) => {
                                 <tr key={index + "tr"}>
                                     <td key={index + "td1"}>{index}</td>
                                     <td key={index + "td2"}>pizzanTilaaja02</td>
-                                    <td style={event instanceof ProductRemovedFromCart ? {color: "red"} : {}} key={index + "td3"}>
+                                    <td style={event instanceof ProductRemovedFromCart ? {color: "#d31e1e"} : {}} key={index + "td3"}>
                                         {event.toString()}
                                     </td>
                                 </tr>
@@ -177,7 +218,7 @@ const Checkbox = ({ label, handleEvent, order }) => {
                     )}
                 </ul>
             </div>
-            <p>Hinta: {price} €</p>
+            <p className="price">Hinta: {price} €</p>
         </div>
     );
   };
