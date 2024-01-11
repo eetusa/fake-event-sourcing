@@ -96,7 +96,7 @@ const ShoppingCart = () => {
                         <table style={{textAlign: "right", fontSize: "20px"}}>
                             <tbody>
                                 <tr>
-                                    <th>event id</th>
+                                    <th>row id</th>
                                     <th>cart id</th>
                                     {products.map(((p, index) => 
                                         <th key={p + index}>
