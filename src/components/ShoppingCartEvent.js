@@ -37,6 +37,6 @@ export class OrderMadeFromCart {
             }
         }
 
-        return "Tilattu: " + keys;
+        return "Tilattu pizza: " + keys;
     }
 }

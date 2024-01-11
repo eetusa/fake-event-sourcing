@@ -7,10 +7,21 @@ const ShoppingCart = () => {
     const [events, setEvents] = useState([]);
     const [order, setOrder] = useState(() => new Map());
     const [page, setPage] = useState(0);
+    const [buttonLabel, setButtonLabel] = useState("Tee tilaus");
+
 
     const handleOrder = () => {
         let value = page + 1;
         setPage(value);
+        if (value === 0) {
+            setButtonLabel("Tee tilaus")
+        } else if (value % 3 === 1) {
+            setButtonLabel("Näytä eventit")
+        } else if (value % 3 === 2) {
+            setButtonLabel("Palaa")
+        } else if (value % 3 === 0) {
+            setButtonLabel("'CRUD' versio")
+        }
     }
 
     const handleEvent = (event) => {
@@ -28,14 +39,12 @@ const ShoppingCart = () => {
         }
         if (event instanceof MakeOrderFromCart) {
             if (page === 0){
-                console.log("OrderMadeFromCart(" + order +")")
+                console.log("OrderMadeFromCart()")
                 tempEvents.push(new OrderMadeFromCart(order))
             }
             handleOrder()
-            console.log(page)
         }
 
-        console.log(tempEvents)
         setEvents(tempEvents)
         setOrder(tempMapOrder)
     }
@@ -57,7 +66,7 @@ const ShoppingCart = () => {
                     </div>
                 }
                 {page % 3 === 1 &&
-                    <div style={{"width": "50%"}}>
+                    <div style={{"width": "50%", padding: "10px"}}>
                         {events[events.length-1].toString()}
                     </div>
                 }
@@ -76,7 +85,9 @@ const ShoppingCart = () => {
         <div style={{"width": "100%", display: "flex"}}>
             <div style={{"width": "50%", margin: "50px"}}></div>
             <div style={{"width": "50%", display: "flex"}}>
-                <button onClick={() => handleEvent(new MakeOrderFromCart(order))}>Tee tilaus</button>
+                <button onClick={() => handleEvent(new MakeOrderFromCart(order))}>
+                    {buttonLabel}
+                </button>
             </div>
         </div>
       </div>
